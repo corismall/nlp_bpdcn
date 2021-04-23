@@ -6,23 +6,23 @@ import boto3
 client = boto3.client('textract')
 for m in dir(client): print(m)  # what are the function attached to the client object?... _ = 'private' function meaning dont call it
 
+f_name = 'agapidou_2014'
+
 #have to set up a aws account s3 bucket... (cloud object storage)
 #for s3object, you need to specify bucket, name and version:
 s3_obj =  {"Bucket": bpdcnpdfbucket, "Name": 'agapidou_2014.pdf'}  #creating dictionary obj
 
 response = client.start_document_text_detection(
     DocumentLocation={'S3Object': s3_obj},
-    ClientRequestToken = '',
-    JobTag = '', 
     NotificationChannel={
-        'SNSTopicArn': 'string',
-        'RoleArn': 'string'
+        'SNSTopicArn': 'arn:aws:sns:us-west-1:760515291717:nlp_topic',
+        'RoleArn': 'arn:aws:iam::760515291717:role/TextractRole'
     },
+    JobTag = '',
     OutputConfig={
-        'S3Bucket': 'string',
-        'S3Prefix': 'string'
-    },
-    KMSKeyId='string')  #for detecting and analyzing text in multipage docs (asynchronous op), I would try both syncrhonous and asynchronous, maybe the synchronous works for pdfs with just a couple of pages?
+        'S3Bucket': 'bpdcnpdfbucket',
+        'S3Prefix': f_name
+    })  #for detecting and analyzing text in multipage docs (asynchronous op), I would try both syncrhonous and asynchronous, maybe the synchronous works for pdfs with just a couple of pages?
 
 
 
