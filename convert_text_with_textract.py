@@ -8,11 +8,11 @@ client = boto3.client('textract')
 
 f_name = 'agapidou_2014'
 
-#have to set up a aws account s3 bucket... (cloud object storage)
+#have to set up an aws account s3 bucket... (cloud object storage)
 #for s3object, you need to specify bucket, name and version:
 s3_obj =  {"Bucket": 'bpdcnpdfbucket', "Name": 'agapidou_2014.pdf'}  #creating dictionary obj
 
-response = client.start_document_text_detection(
+detect = client.start_document_text_detection(
     DocumentLocation={'S3Object': s3_obj},
     NotificationChannel={
         'SNSTopicArn': 'arn:aws:sns:us-west-1:760515291717:nlp_topic',
@@ -23,21 +23,33 @@ response = client.start_document_text_detection(
         'S3Prefix': f_name
     })  #for detecting and analyzing text in multipage docs (asynchronous op), I would try both syncrhonous and asynchronous, maybe the synchronous works for pdfs with just a couple of pages?
 
-print(response)
+print('detect: \n', detect['JobId']) 
+detect_jobid = detect['JobId']
 
 
-#response = client.GetDocumentTextDetection(Document = {'S3Object': s3_obj})  #nesting dictionary s3_obj inside document dictionary and giving that to the client function 
-#get results returned, we want an s3object dictionary to be returned 
+doc_text = client.get_document_text_detection(
+    JobId = detect_jobid)
+
+print(doc_text['JobStatus'])
+#,'\n',doc_text['Blocks'].keys())
 
 #response is a dictionary type: you can look at the document page that specifies the basic the s3 object metadata to get fields that you can query from the dict
 
-#detect = response.copy()  #save output as detection (of the pdf output)
+#doc_text_copy = doc_text.copy()  #save output as detection (of the pdf output)
 
 #now to analyze all the gibberish (output = list of block objects) this is the synchronous version:
-#response2 = client.analyze_document(Document = {'S3Object': s3_obj}, FeatureTypes = ['TABLES'])
+
+#response = client.start_document_analysis(DocumentLocation = {'S3Object': s3_obj})
+
+#print('response: \n',response)
+
 #document = s3object
 #observation: of required syntax: the layout is confusing to you, the request syntax that the boto3 doc specifies is telling you what type of ojbect to pass the client.function and the naming convention of the returned object! thats it! dont worry, just keep in mind the indendation and parentheses
 #featuretypes is required
+
+#response2 = client.get_document_analysis(JobId='1c2142394bb10a48270d569e74930757b95d33492b2281c6fa6a8705b6aee88f')
+
+#response2['JobStatus']
 #response2['Blocks'][0].keys()  # print name of each block
 
 #for b in response2['Blocks']:
