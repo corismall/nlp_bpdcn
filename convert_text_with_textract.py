@@ -3,8 +3,8 @@ import json
 import sys
 import time
 
-# make sure your aws role has the correct permissions to run textract, see https://docs.aws.amazon.com/textract/latest/dg/api-async-roles.html 
-# to configure 
+message = 'make sure your aws role has the correct permissions to run textract, see https://docs.aws.amazon.com/textract/latest/dg/api-async-roles.html to configure' 
+print(message)
 
 class ProcessType:
     DETECTION = 1
