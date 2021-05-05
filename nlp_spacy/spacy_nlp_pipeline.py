@@ -1,6 +1,7 @@
 import spacy
 from spacy import displacy
 from spacy.matcher import Matcher
+from spacy.tokens import Token
 
 # Load the large English NLP model
 nlp = spacy.load('en_core_web_lg')
@@ -22,8 +23,8 @@ neg_exp = ['-']
 pos_pattern = [{"IS_PUNCT": True}, {"TEXT": '+'}, {"IS_PUNCT": True}]
 neg_pattern = [{"IS_PUNCT": True}, {"TEXT": '-'}, {"IS_PUNCT": True}]
 
-matcher.add('cd positive', [pos_pattern])
-matcher.add('cd negative', [neg_pattern])
+#matcher.add('cd positive', [pos_pattern])
+#matcher.add('cd negative', [neg_pattern])
 
 
 # Parse the text with spaCy. This runs the entire pipeline.
@@ -47,18 +48,36 @@ clean_text = " ".join(text.split())
 doc = nlp(clean_text)
 
 matches = matcher(doc)
+
 for match_id, start, end in matches:
     string_id = doc.vocab.strings[match_id]  # look up string id
     span = doc[start:end]
     print(string_id, span.text)
 
-#for num,sentence in enumerate(doc.sents):
- #   print(f'{num}:{sentence}')
+cd_exp = []
 
-#for token in doc:
- #   print(token.text, token.is_punct)
+for match_id, start, end in matches:
+    if doc.vocab.strings[match_id] == "cd positive" or "cd negative":
+        cd_exp.append(doc[start:end])
 
-#sentence_spans = list(doc_spacy.sents)
+Token.set_extension("is_expression", default=False)
+
+with doc.retokenize() as retokenizer:
+    for span in cd_exp:
+        retokenizer.merge(span)
+        for token in span:
+            token._.is_expression = True
+
+for token in doc:
+    print(token)
+    if token.text == '(+)' or '(-)':
+        print('yes')
+    else:
+        pass    
+    print(token.text, token._.is_expression, token.pos_)
+
+#sentence_spans = list(doc.sents)
+#print(sentence_spans)
 #displacy.serve(sentence_spans, style="dep")
 
 # 'doc' now contains a parsed version of text. We can use it to do anything we want!
