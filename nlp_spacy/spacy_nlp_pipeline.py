@@ -114,6 +114,11 @@ print("Verbs:", [token.lemma_ for token in doc if token.pos_ == "VERB"])'''
 #    print(f"{entity.text} ({entity.label_})")
 
 
+
+
+
+#where I got my infos: https://www.youtube.com/watch?v=THduWAnG97k
+
 #How training works:
 #1) initialize the model weights randomly with nlp.begin_training
 #2) predict labels (text category, or an entity span and its type) with a few examples with the current weights by calling nlp.update
@@ -122,11 +127,77 @@ print("Verbs:", [token.lemma_ for token in doc if token.pos_ == "VERB"])'''
 #5) update weights slightly
 #6) go back to step 2
 
+'''TRAINING_DATA = [
+    ("TEXT", {"entities":[(position, "LABEL")]}),
+    (),
+    (), etc
+
+]'''
 
 
 
 
 
+
+
+
+
+#Steps of a training loop
+#1) loop for a number of times
+#2) shuffle the training data
+#3) divide the data into batches : 'mini-batching'
+#4) update the model for each batch
+#5) save the updated model
+
+#loop for 10 iterations
+'''for i in range(10):
+    #shuffle the training data
+    random.shuffle(TRAINING_DATA)
+    #create batches and iterate over them
+    for batch in spacy.util.minibatch(TRAINING_DATA):
+        #split the batch in texts and annotations
+        texts = [text for text, annotation in batch]
+        annotations = [annotation for text, annotation in batch]
+        #update the model
+        nlp.update(texts, annotations)
+
+#save the model
+nlp.to_disk(path_to_model)'''
+
+
+#updating model
+
+#start with blank english model
+nlp = spacy.blank("en")
+#create blank entity recognizer and add it to the pipeline
+ner = nlp.create_pipe('ner')
+nlp.add_pipe(ner)
+#add a new label
+ner.add_label(LABEL)
+
+#start the training
+#nlp.begin_training()
+#train for 10 iterations
+'''for itn in range(10):
+    random.shuffle(examples)
+    #divide examples into batches
+    for batch in spacy.util.minibatch(examples, size=2):
+        texts = [texts for text, annotation in batch]
+        annotations = [annotation for text, annotation in batch]
+        #update the model
+        nlp.update(texts, annotations)'''
+
+
+###########
+#Best practices
+#to overcome the 'Catastrophic Forgetting' problem:
+#mix in previously correct preditcions, just keep adding entities to your previous training dataset
+
+#models cant learn everything
+#spacy models make predictions based on a local context
+#decisions are also difficult to make base on context alone
+#label scheme needs to be consistent and not too specific
+#plan label scheme: pick categories that are reflected in local context, more generic, use rule to go from generic to specific
 
 
 
