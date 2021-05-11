@@ -1,3 +1,4 @@
+from os import sep
 import spacy
 from spacy import displacy
 from spacy.matcher import Matcher
@@ -26,21 +27,7 @@ def get_text(file):
     #page = something
     #return page
 
-#for later:
-# Doc.set_extension('id', default=None)
-# Doc.set_extension('page_number', default=None)
-#
-# data = list(get_text(file), {"id": doi, "page_number: page"})
-
-'''for doc, context in nlp.pipe(data, as_tuples=True):
-    doc._.id = context["id"]
-    doc._.page_number = context["page_number"]'''
-
-
-# Parse the text with spaCy. This runs the entire pipeline.
-
 #file = '/Users/corinnsmall/Documents/Github/nlp/textractor_outputs/agapidou_2014-pdf-page-1-text-inreadingorder.txt'
-
 text = '''A 78-year-old Caucasian female patient presented
 to our department with a cutaneous lesion on her right
 shoulder (Figure la). Bone marrow aspiration showed 5% infiltration of
@@ -48,61 +35,62 @@ immature blast cells with the following immunophenotype:
 CD45 (+), CD123 (+), CD85k (+), CD33 (-), CD14 (-), CD16
 (-), CD19 (-), CD5 (-), CD10 (-), CD20 (-), CD56 (+) 20%,
 CD4 (+), NG2 (+). No chromosomal alterations were detected
-by cytogenetic analysis of the bone marrow (46,XX).'''
+by cytogenetic analysis of the bone marrow (46,XX). 
+BPDCN is known to express CD123 (bright), HLA-DR (+), CD4 (+) with aberrant expression of CD56; additional markers such as TCL-1 and CD303 add specificity to the diagnosis [5].'''
 
 clean_text = " ".join(text.split())
 #print(text, clean_text)
 
-#create doc
+text_sentences = clean_text.split('.')
+# or later sentence_spans = list(doc.sents)
+#print(sentence_spans)
+#print(text_sentences)
 
-doc = nlp(clean_text)
- 
-
-# Use matcher to create training data!
 # Add match ID "cd marker negative" with no callback and one pattern
 pos_exp = ['+']
 neg_exp = ['-']
 
-pos_pattern = [{"IS_PUNCT": True}, {"TEXT": '+'}, {"IS_PUNCT": True}]
-neg_pattern = [{"IS_PUNCT": True}, {"TEXT": '-'}, {"IS_PUNCT": True}]
+pos_pattern = [[{"IS_PUNCT": True}, {"TEXT": '+'}, {"IS_PUNCT": True}], [{"IS_PUNCT": True}, {"TEXT": 'bright'}, {"IS_PUNCT": True}],[{'TEXT': '+'}]]
+neg_pattern = [{"IS_PUNCT": True}, {"TEXT": '-'}, {"IS_PUNCT": True}] 
 
-matcher.add('cd positive', [pos_pattern])
-matcher.add('cd negative', [neg_pattern])
-
-
-matches = matcher(doc)
-#print(matches)
-
-for match_id, start, end in matches:
-    string_id = doc.vocab.strings[match_id]  # look up string hash id
-    span = Span(doc, start, end)
-    print(span)
+matcher.add('cd_positive', pos_pattern)
+matcher.add('cd_negative', [neg_pattern])
 
 
-print(Doc.doc.ents)
+# Use matcher to create training data!
+
+TRAINING_DATA = []
+
+for doc in nlp.pipe(text_sentences):    
+    #Match on the doc and create a list of matched spans
+    #print(doc)
+    matches = matcher(doc)
+    spans = []
+    entities = []
+    for match_id, start, end in matches:
+        span = doc[start:end]
+        string_id = nlp.vocab.strings[match_id]
+        spans.append((span,string_id))
+    
+    for span, string_id in spans:
+        #print(span, string_id)
+        entities.append((span.start, span.end, string_id))
+    
+    # Format the matches as a (doc.text, entities) tuple
+    if doc.text:
+        training_example = (doc.text, {'entities': entities})
+        TRAINING_DATA.append(training_example)
+    else:
+        pass
 
 
-'''print(doc)
-print('')
-print("Noun phrases:", [chunk.text for chunk in doc.noun_chunks])
-print('')
-print("Verbs:", [token.lemma_ for token in doc if token.pos_ == "VERB"])'''
+print(*TRAINING_DATA, sep="\n")
 
 
 
-#for token in doc:
- #   print(token.text)
-  #  if token.text == '(+)' or '(-)':
-   #     print('yes')
-    #else:
-     #   pass    
-    #print(token.text, token._.is_expression, token.pos_)
 
-#sentence_spans = list(doc.sents)
-#print(sentence_spans)
-#displacy.serve(sentence_spans, style="dep")
 
-# 'doc' now contains a parsed version of text. We can use it to do anything we want!
+
 
 # Analyze syntax
 #print("Noun phrases:", [chunk.text for chunk in doc.noun_chunks])
@@ -168,12 +156,12 @@ nlp.to_disk(path_to_model)'''
 #updating model
 
 #start with blank english model
-nlp = spacy.blank("en")
+#nlp = spacy.blank("en")
 #create blank entity recognizer and add it to the pipeline
-ner = nlp.create_pipe('ner')
-nlp.add_pipe(ner)
+#ner = nlp.create_pipe('ner')
+#nlp.add_pipe(ner)
 #add a new label
-ner.add_label(LABEL)
+#ner.add_label(LABEL)
 
 #start the training
 #nlp.begin_training()
