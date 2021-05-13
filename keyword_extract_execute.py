@@ -2,13 +2,13 @@
 #Corinn Small corinn.small@ucsf.edu
 
 
-import pdfToolkit
+import pdfToolkit, glob
 
 
 #convert pdfs to xml, need to connect to grobid api to use convert_text() (only need to run once)
 path = '/Users/corinnsmall/Documents/BPDCN/bpdcn_papers/'
 outpath = path + 'xml_output/'
-convert_text(path,outpath)
+#convert_text(path,outpath)
 
 
 ################################
@@ -57,7 +57,7 @@ files_list = []
 
 for file in files:   #store xml info in TEIFILE object
     file_list = []
-    f = TEIFile(file)
+    f = pdfToolkit.TEIFile(file)
     name = f.filename.split('/')[-1].split('.')[0]
     f.text
     print('-----------------------------------------------------------\n')

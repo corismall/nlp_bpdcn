@@ -27,7 +27,7 @@ def convert_text(inpath,outpath):
     print('Converting text...')
     print('')
         
-    client = grobid.grobid_client(config_path="./grobid_client_python/config.json")
+    client = grobid.grobid_client(config_path="/Users/corinnsmall/Documents/Github/grobid_client_python/config.json")
     client.process("processFulltextDocument", inpath, outpath)
     
     print('Done')
@@ -144,6 +144,13 @@ class TEIFile(object):
         
         if not self._text:
             paper_text = {}  
+
+            abstract = self.soup.profileDesc.find_all('abstract')
+            sect_abs = []
+            for p in abstract:
+                sect_text = p.get_text(separator= ' ', strip =  True)
+                sect_abs.append(sect_text)
+                paper_text['abstract'] = sect_abs
                 
             divs = self.soup.body.find_all('div')
             #print(divs)
