@@ -139,18 +139,18 @@ class TEIFile(object):
         returns dictionary by subsection
         '''
         #print(self.soup.prettify())
-        print(self.filename.split('/')[-1])
-        print('')
+        #print(self.filename.split('/')[-1])
+        #print('')
         
         if not self._text:
             paper_text = {}  
 
-            abstract = self.soup.profileDesc.find_all('abstract')
+            '''abstract = self.soup.profileDesc.find_all('abstract')
             sect_abs = []
             for p in abstract:
                 sect_text = p.get_text(separator= ' ', strip =  True)
                 sect_abs.append(sect_text)
-                paper_text['abstract'] = sect_abs
+                paper_text['abstract'] = sect_abs'''
                 
             divs = self.soup.body.find_all('div')
             #print(divs)
@@ -176,7 +176,7 @@ class TEIFile(object):
                             head_text = head.get_text(separator=' ', strip=True).lower()
                             
                             
-                            if len(head_text.split(' ')) > 7:  #if the head title is < 7 words long (arbitrary #) ask the user to clarify its validity
+                            '''if len(head_text.split(' ')) > 7:  #if the head title is < 7 words long (arbitrary #) ask the user to clarify its validity
                                 print('subtitle sentence: ', head_text)
                                 
                                 ans = input('Is this subsection a full sentence? y/n')
@@ -231,7 +231,7 @@ class TEIFile(object):
                                     #print(p)
                                     sect_text = p.get_text(separator=' ', strip=True)
                                     sect_.append(sect_text)
-                                    #print('subsection title < 7 words')
+                                    #print('subsection title < 7 words')'''
                         
                                 
                             

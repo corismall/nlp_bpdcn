@@ -54,48 +54,57 @@ def add_training_data(sentence_list):
 
 
 spell = SpellChecker()
-files = glob.glob('/Users/corinnsmall/Documents/BPDCN/bpdcn_papers/single_case_papers/xml_output/berger_2004.tei.xml')
+files = glob.glob('/Users/corinnsmall/Documents/Github/nlp/nlp_spacy/training_papers/*.xml')
+training_data = []
 
 for file in files:   #store xml info in TEIFILE object
     f = pdfToolkit.TEIFile(file)
-    name = f.filename.split('/')[-1].split('.')[0]
-    print(name)
+    print(f.filename.split('/')[-1])
+    print('')
     f.text
 
     #clean TEIFile object text
     for k,v in f.text.items():
         #by section k
-        print(k)
+        #print(k)
         v_strip = []
         for s in v:
             t = s.strip()
             v_strip.append(t)
         full_text = " ".join(v_strip)
-        print('full_text ',full_text)
-        print('')
+        #print('full_text ',full_text)
+        #print('')
         clean_text = " ".join(full_text.split())
-        print('clean_text ',clean_text)
-        print('')
+        #print('clean_text ',clean_text)
+        #print('')
     
 
         #split text into sentences
         text_sentences = clean_text.lower().split('.')
         # or later sentence_spans = list(doc.sents)
-        
-        misspelled = spell.unknown(text_sentences)
-        for word in misspelled:
-            print(word, )
-            # Get the one `most likely` answer
-            #print(spell.correction(word))
- 
-            # Get a list of `likely` options
-            #print(spell.candidates(word))
 
         #create training data
-        #t_data = add_training_data(text_sentences)
-        #print(*t_data, sep="\n")
+        t_data = add_training_data(text_sentences)
+        print(*t_data, sep="\n")
 
+        #add file training data to total training data file
+        for i in t_data: 
+            training_data.append(i)
 
+'''for e in training_data:
+    print(training_data[0], '\n', training_data[1], '\n----------------------------------------------------')
+'''
+#############################################
+# how to check for whether text is okay #
+''' misspelled = spell.unknown(text_sentences)
+    for word in misspelled:
+    print(word, )'''
+    # Get the one `most likely` answer
+    #print(spell.correction(word))
+
+    # Get a list of `likely` options
+    #print(spell.candidates(word))
+###############################################
 
 # Analyze syntax
 #print("Noun phrases:", [chunk.text for chunk in doc.noun_chunks])
